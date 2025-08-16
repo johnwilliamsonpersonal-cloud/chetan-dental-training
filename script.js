@@ -69,64 +69,49 @@
       document.getElementById('answer-btn').addEventListener('click', answerPhone);
   }
 
-  // Clean Wistia video setup
+  // Updated Wistia video setup for wistia-player elements
   function setupWistiaVideos() {
-      window._wq = window._wq || [];
+      // Configure Wistia players using the new method
+      window.wistiaOptions = window.wistiaOptions || {};
 
-      // Intro video - enables Start Learning button
-      window._wq.push({
-          id: '6vif2yc5c5',
-          onReady: function(video) {
-              console.log('Intro video ready');
-              video.bind('end', function() {
-                  enableButton('start-btn', 'intro');
-              });
-          }
-      });
+      // Set up each video with completion tracking
+      const videoConfigs = {
+          '6vif2yc5c5': { buttonId: 'start-btn', videoType: 'intro' },
+          'ou03n83tjo': { buttonId: 'continue-to-ring', videoType: 'ring' },
+          '7be6v4rh7b': { buttonId: 'continue-to-greeting', videoType: 'greeting' },
+          '2yynxcpkld': { buttonId: 'continue-to-audio', videoType: 'audio' },
+          'mut2ffueih': { buttonId: 'continue-to-practice', videoType: 'practice' }
+      };
 
-      // Ring foundation video - enables Practice button
-      window._wq.push({
-          id: 'ou03n83tjo',
-          onReady: function(video) {
-              console.log('Ring video ready');
-              video.bind('end', function() {
-                  enableButton('continue-to-ring', 'ring');
-              });
-          }
-      });
+      // Wait for players to be ready and bind events
+      setTimeout(() => {
+          Object.keys(videoConfigs).forEach(videoId => {
+              const config = videoConfigs[videoId];
 
-      // Greeting formula video - enables Build button
-      window._wq.push({
-          id: '7be6v4rh7b',
-          onReady: function(video) {
-              console.log('Greeting video ready');
-              video.bind('end', function() {
-                  enableButton('continue-to-greeting', 'greeting');
-              });
-          }
-      });
-
-      // Audio mistakes video - enables Analyze button
-      window._wq.push({
-          id: '2yynxcpkld',
-          onReady: function(video) {
-              console.log('Audio video ready');
-              video.bind('end', function() {
-                  enableButton('continue-to-audio', 'audio');
-              });
-          }
-      });
-
-      // Practice confidence video - enables Record button
-      window._wq.push({
-          id: 'mut2ffueih',
-          onReady: function(video) {
-              console.log('Practice video ready');
-              video.bind('end', function() {
-                  enableButton('continue-to-practice', 'practice');
-              });
-          }
-      });
+              // Try to get the Wistia player
+              if (window.Wistia && window.Wistia.api) {
+                  const video = window.Wistia.api(videoId);
+                  if (video) {
+                      console.log(`${config.videoType} video ready`);
+                      video.bind('end', function() {
+                          console.log(`${config.videoType} video ended`);
+                          enableButton(config.buttonId, config.videoType);
+                      });
+                  } else {
+                      console.log(`Waiting for ${config.videoType} video...`);
+                      // Retry in 2 seconds if video not ready
+                      setTimeout(() => {
+                          const retryVideo = window.Wistia.api(videoId);
+                          if (retryVideo) {
+                              retryVideo.bind('end', function() {
+                                  enableButton(config.buttonId, config.videoType);
+                              });
+                          }
+                      }, 2000);
+                  }
+              }
+          });
+      }, 1000);
   }
 
   // Enable button after video completion
