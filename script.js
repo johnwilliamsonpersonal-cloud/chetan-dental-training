@@ -1,12 +1,8 @@
-// Progress tracking
-  let currentStep = 0;
-  const totalSteps = 8; // Updated to include video sections
+// Fresh start - Clean script for dental training system with Wistia videos
 
-  // Ring exercise variables
-  let ringCount = 0;
-  let ringingInterval;
-  let hasAnswered = false;
-  const phoneRing = new Audio('assets/audio/phone-ring.mp3');
+  // Progress tracking
+  let currentStep = 0;
+  const totalSteps = 8;
 
   // Video completion tracking
   let videoCompletions = {
@@ -17,116 +13,125 @@
       practice: false
   };
 
-  // Initialize when page loads
+  // Ring exercise variables
+  let ringCount = 0;
+  let hasAnswered = false;
+  let phoneRing = new Audio('assets/audio/phone-ring.mp3');
+
+  // Greeting builder variables
+  let draggedElement = null;
+  let greetingOrder = [null, null, null, null];
+
+  // Audio comparison variables
+  let audioRatings = [0, 0, 0];
+
+  // Recording variables
+  let mediaRecorder = null;
+  let recordedChunks = [];
+  let isRecording = false;
+
+  // Initialize everything when page loads
   document.addEventListener('DOMContentLoaded', function() {
+      console.log('Initializing dental training system...');
+      setupBasicEventListeners();
+      setupWistiaVideos();
       updateProgress();
-      setupEventListeners();
-      setupVideoListeners();
   });
 
-  function setupEventListeners() {
-      // Start button (now goes to ring intro video)
-      document.getElementById('start-btn').addEventListener('click', function() {
-          showSection('ring-intro-video');
-          currentStep = 1;
-          updateProgress();
+  // Set up basic navigation and exercise buttons
+  function setupBasicEventListeners() {
+      // Main navigation buttons
+      document.getElementById('start-btn').addEventListener('click', () => {
+          goToSection('ring-intro-video', 1);
       });
 
-      // Video continue buttons
-      document.getElementById('continue-to-ring').addEventListener('click', function() {
-          showSection('ring-exercise');
-          currentStep = 2;
-          updateProgress();
+      document.getElementById('continue-to-ring').addEventListener('click', () => {
+          goToSection('ring-exercise', 2);
       });
 
-      document.getElementById('continue-to-greeting').addEventListener('click', function() {
-          showSection('greeting-builder');
-          currentStep = 4;
-          updateProgress();
+      document.getElementById('continue-to-greeting').addEventListener('click', () => {
+          goToSection('greeting-builder', 4);
           setTimeout(initializeGreetingBuilder, 100);
       });
 
-      document.getElementById('continue-to-audio').addEventListener('click', function() {
-          showSection('audio-comparison');
-          currentStep = 6;
-          updateProgress();
+      document.getElementById('continue-to-audio').addEventListener('click', () => {
+          goToSection('audio-comparison', 6);
           setTimeout(initializeAudioComparison, 100);
       });
 
-      document.getElementById('continue-to-practice').addEventListener('click', function() {
-          showSection('practice-recorder');
-          currentStep = 8;
-          updateProgress();
+      document.getElementById('continue-to-practice').addEventListener('click', () => {
+          goToSection('practice-recorder', 8);
           setTimeout(initializePracticeRecorder, 100);
       });
 
-      // Start ringing button
-      document.getElementById('start-ringing').addEventListener('click', startRinging);
-
-      // Answer button
+      // Ring exercise buttons
+      document.getElementById('start-ringing').addEventListener('click', startPhoneRinging);
       document.getElementById('answer-btn').addEventListener('click', answerPhone);
   }
 
-  function showSection(sectionId) {
-      // Stop any ongoing phone ringing
-      hasAnswered = true;
-
-      // Hide all sections
-      document.querySelectorAll('.section').forEach(section => {
-          section.classList.remove('active');
-      });
-
-      // Show target section
-      document.getElementById(sectionId).classList.add('active');
-  }
-
-  function updateProgress() {
-      const progressPercent = (currentStep / totalSteps) * 100;
-      document.getElementById('progress').style.width = progressPercent + '%';
-  }
-
-  // Video event listeners for Wistia players
-  function setupVideoListeners() {
-      // Wait for Wistia to be ready
+  // Clean Wistia video setup
+  function setupWistiaVideos() {
       window._wq = window._wq || [];
 
-      // Intro video
-      window._wq.push({ id: '6vif2yc5c5', onReady: function(video) {
-          video.bind('end', function() {
-              markVideoComplete('intro');
-          });
-      }});
+      // Intro video - enables Start Learning button
+      window._wq.push({
+          id: '6vif2yc5c5',
+          onReady: function(video) {
+              console.log('Intro video ready');
+              video.bind('end', function() {
+                  enableButton('start-btn', 'intro');
+              });
+          }
+      });
 
-      // Ring video
-      window._wq.push({ id: 'ou03n83tjo', onReady: function(video) {
-          video.bind('end', function() {
-              markVideoComplete('ring');
-          });
-      }});
+      // Ring foundation video - enables Practice button
+      window._wq.push({
+          id: 'ou03n83tjo',
+          onReady: function(video) {
+              console.log('Ring video ready');
+              video.bind('end', function() {
+                  enableButton('continue-to-ring', 'ring');
+              });
+          }
+      });
 
-      // Greeting video
-      window._wq.push({ id: '7be6v4rh7b', onReady: function(video) {
-          video.bind('end', function() {
-              markVideoComplete('greeting');
-          });
-      }});
+      // Greeting formula video - enables Build button
+      window._wq.push({
+          id: '7be6v4rh7b',
+          onReady: function(video) {
+              console.log('Greeting video ready');
+              video.bind('end', function() {
+                  enableButton('continue-to-greeting', 'greeting');
+              });
+          }
+      });
 
-      // Audio video
-      window._wq.push({ id: '2yynxcpkld', onReady: function(video) {
-          video.bind('end', function() {
-              markVideoComplete('audio');
-          });
-      }});
+      // Audio mistakes video - enables Analyze button
+      window._wq.push({
+          id: '2yynxcpkld',
+          onReady: function(video) {
+              console.log('Audio video ready');
+              video.bind('end', function() {
+                  enableButton('continue-to-audio', 'audio');
+              });
+          }
+      });
 
-      // Practice video
-      window._wq.push({ id: 'mut2ffueih', onReady: function(video) {
-          video.bind('end', function() {
-              markVideoComplete('practice');
-          });
-      }});
+      // Practice confidence video - enables Record button
+      window._wq.push({
+          id: 'mut2ffueih',
+          onReady: function(video) {
+              console.log('Practice video ready');
+              video.bind('end', function() {
+                  enableButton('continue-to-practice', 'practice');
+              });
+          }
+      });
   }
 
-  function markVideoComplete(videoType) {
+  // Enable button after video completion
+  function enableButton(buttonId, videoType) {
+      console.log(`Video completed: ${videoType}`);
       videoCompletions[videoType] = true;
 
       // Show completion indicator
@@ -135,103 +140,124 @@
           indicator.style.display = 'block';
       }
 
-      // Enable corresponding continue button
-      let buttonId = '';
-      switch(videoType) {
-          case 'intro':
-              buttonId = 'start-btn';
-              break;
-          case 'ring':
-              buttonId = 'continue-to-ring';
-              break;
-          case 'greeting':
-              buttonId = 'continue-to-greeting';
-              break;
-          case 'audio':
-              buttonId = 'continue-to-audio';
-              break;
-          case 'practice':
-              buttonId = 'continue-to-practice';
-              break;
-      }
-
+      // Enable button
       const button = document.getElementById(buttonId);
       if (button) {
           button.disabled = false;
           button.classList.add('video-completed');
+          console.log(`Button ${buttonId} enabled`);
       }
   }
 
-  function startRinging() {
-      // Reset variables
+  // Navigate to section and update progress
+  function goToSection(sectionId, step) {
+      // Hide all sections
+      document.querySelectorAll('.section').forEach(section => {
+          section.classList.remove('active');
+      });
+
+      // Show target section
+      document.getElementById(sectionId).classList.add('active');
+
+      // Update progress
+      currentStep = step;
+      updateProgress();
+
+      // Stop any phone ringing
+      hasAnswered = true;
+  }
+
+  function updateProgress() {
+      const progressPercent = (currentStep / totalSteps) * 100;
+      document.getElementById('progress').style.width = progressPercent + '%';
+  }
+
+  // === PHONE RINGING EXERCISE ===
+  function startPhoneRinging() {
+      console.log('Starting phone ringing exercise');
+
+      // Reset everything
       ringCount = 0;
       hasAnswered = false;
 
-      // Reset UI
+      // Update UI
       document.getElementById('ring-count').textContent = '0';
       document.getElementById('answer-btn').disabled = true;
       document.getElementById('feedback').innerHTML = '';
       document.getElementById('start-ringing').disabled = true;
       document.getElementById('start-ringing').textContent = 'Ringing...';
 
-      // Function to play one ring
-      function playRing() {
-          if (ringCount >= 5 || hasAnswered) {
-              if (ringCount >= 5) {
-                  showFeedback('Too many rings! Patients may hang up. Try again.', 'warning');
-                  resetExercise();
-              }
-              return;
+      // Set up audio
+      phoneRing.volume = 0.7;
+      phoneRing.currentTime = 0;
+
+      // Start ringing sequence
+      setTimeout(playNextRing, 500);
+  }
+
+  function playNextRing() {
+      if (ringCount >= 5 || hasAnswered) {
+          if (ringCount >= 5) {
+              showFeedback('Too many rings! Patients may hang up. Try again.', 'warning');
+              resetRingExercise();
           }
-
-          ringCount++;
-
-          // Play sound and update display at exactly the same moment
-          phoneRing.currentTime = 0;
-          phoneRing.play().catch(() => {});
-          document.getElementById('ring-count').textContent = ringCount;
-
-          // Enable answer button after first ring
-          if (ringCount >= 1) {
-              document.getElementById('answer-btn').disabled = false;
-          }
-
-          // Schedule next ring after audio file duration + small gap
-          setTimeout(playRing, 3500);
+          return;
       }
 
-      // Start first ring after short delay
-      setTimeout(playRing, 500);
+      ringCount++;
+      console.log(`Ring ${ringCount}`);
+
+      // Play phone ring sound
+      phoneRing.currentTime = 0;
+      phoneRing.play().catch(error => {
+          console.log('Audio blocked by browser - continuing with visual feedback');
+      });
+
+      // Update display
+      document.getElementById('ring-count').textContent = ringCount;
+
+      // Enable answer button after first ring
+      if (ringCount >= 1) {
+          document.getElementById('answer-btn').disabled = false;
+      }
+
+      // Schedule next ring
+      setTimeout(playNextRing, 3500);
   }
 
   function answerPhone() {
       if (hasAnswered) return;
 
       hasAnswered = true;
+      console.log(`Phone answered on ring ${ringCount}`);
 
-      // Provide nuanced feedback based on ring count
       if (ringCount === 1) {
           showFeedback('Wow! You\'re fast off the mark! While quick responses are good, you could use the first 2 rings to take a breath, smile, and prepare for the call. Give it another go!', 'warning');
-          setTimeout(resetExercise, 4000);
+          setTimeout(resetRingExercise, 4000);
       } else if (ringCount === 2) {
           showFeedback('Good timing! You\'re answering quickly while giving yourself a moment to prepare. This shows both efficiency and professionalism.', 'success');
-          setTimeout(resetExercise, 4000);
+          setTimeout(resetRingExercise, 4000);
       } else if (ringCount === 3) {
           showFeedback('Perfect! Answering by the 3rd ring is the gold standard - it shows professionalism and respect for the patient\'s time while allowing you to be fully prepared.', 'success');
           currentStep = 3;
           updateProgress();
-          // Show next section button after perfect answer
           setTimeout(() => {
               document.getElementById('start-ringing').disabled = false;
               document.getElementById('start-ringing').textContent = 'Continue to Greeting Video';
               document.getElementById('start-ringing').onclick = () => {
-                  showSection('greeting-intro-video');
+                  goToSection('greeting-intro-video', 3);
               };
           }, 4000);
       } else {
           showFeedback('Good, but try to answer by the 3rd ring. Patients appreciate quick responses and may hang up if they wait too long.', 'warning');
-          setTimeout(resetExercise, 4000);
+          setTimeout(resetRingExercise, 4000);
       }
+  }
+
+  function resetRingExercise() {
+      document.getElementById('start-ringing').disabled = false;
+      document.getElementById('start-ringing').textContent = 'Try Again';
+      document.getElementById('answer-btn').disabled = true;
   }
 
   function showFeedback(message, type) {
@@ -240,16 +266,7 @@
       feedback.className = 'feedback ' + type;
   }
 
-  function resetExercise() {
-      document.getElementById('start-ringing').disabled = false;
-      document.getElementById('start-ringing').textContent = 'Try Again';
-      document.getElementById('answer-btn').disabled = true;
-  }
-
-  // Greeting Builder functionality
-  let draggedElement = null;
-  let greetingOrder = [null, null, null, null];
-
+  // === GREETING BUILDER ===
   function initializeGreetingBuilder() {
       console.log('Initializing greeting builder...');
 
@@ -257,50 +274,37 @@
       const dropSlots = document.querySelectorAll('.drop-slot');
       const checkButton = document.getElementById('check-greeting');
 
-      if (components.length === 0 || dropSlots.length === 0 || !checkButton) {
-          console.log('Elements not ready, trying again in 500ms...');
+      if (components.length === 0 || !checkButton) {
           setTimeout(initializeGreetingBuilder, 500);
           return;
       }
 
+      // Set up drag and drop
       components.forEach(component => {
-          component.addEventListener('dragstart', handleDragStart);
-          component.addEventListener('dragend', handleDragEnd);
+          component.addEventListener('dragstart', (e) => {
+              draggedElement = e.target;
+              e.target.classList.add('dragging');
+          });
+
+          component.addEventListener('dragend', (e) => {
+              e.target.classList.remove('dragging');
+              draggedElement = null;
+          });
       });
 
       dropSlots.forEach(slot => {
-          slot.addEventListener('dragover', handleDragOver);
+          slot.addEventListener('dragover', (e) => e.preventDefault());
+          slot.addEventListener('dragenter', (e) => {
+              if (e.target.classList.contains('drop-slot') && !e.target.classList.contains('filled')) {
+                  e.target.classList.add('drag-over');
+              }
+          });
+          slot.addEventListener('dragleave', (e) => e.target.classList.remove('drag-over'));
           slot.addEventListener('drop', handleDrop);
-          slot.addEventListener('dragenter', handleDragEnter);
-          slot.addEventListener('dragleave', handleDragLeave);
       });
 
       checkButton.addEventListener('click', checkGreeting);
-      console.log('Greeting builder initialized successfully!');
-  }
-
-  function handleDragStart(e) {
-      draggedElement = e.target;
-      e.target.classList.add('dragging');
-  }
-
-  function handleDragEnd(e) {
-      e.target.classList.remove('dragging');
-      draggedElement = null;
-  }
-
-  function handleDragOver(e) {
-      e.preventDefault();
-  }
-
-  function handleDragEnter(e) {
-      if (e.target.classList.contains('drop-slot') && !e.target.classList.contains('filled')) {
-          e.target.classList.add('drag-over');
-      }
-  }
-
-  function handleDragLeave(e) {
-      e.target.classList.remove('drag-over');
+      console.log('Greeting builder ready!');
   }
 
   function handleDrop(e) {
@@ -316,6 +320,7 @@
           draggedElement.style.display = 'none';
           greetingOrder[slotPosition] = componentOrder;
 
+          // Enable check button if all slots filled
           if (greetingOrder.every(slot => slot !== null)) {
               document.getElementById('check-greeting').disabled = false;
           }
@@ -326,34 +331,26 @@
       const correctOrder = [1, 2, 3, 4];
       const isCorrect = greetingOrder.every((order, index) => order === correctOrder[index]);
 
+      const feedback = document.getElementById('greeting-feedback');
       if (isCorrect) {
-          showGreetingFeedback('Perfect! You\'ve mastered the 4-part greeting structure. This professional approach will make every patient feel welcomed and valued.', 'success');
+          feedback.innerHTML = 'Perfect! You\'ve mastered the 4-part greeting structure.';
+          feedback.className = 'feedback success';
           document.getElementById('next-section').style.display = 'inline-block';
-          document.getElementById('next-section').textContent = 'Continue to Audio Video';
           document.getElementById('next-section').onclick = () => {
-              showSection('audio-intro-video');
-              currentStep = 5;
-              updateProgress();
+              goToSection('audio-intro-video', 5);
           };
       } else {
-          showGreetingFeedback('Not quite right. Remember the order: Time of day → Practice name → Your name → How you can help. Try rearranging!', 'warning');
+          feedback.innerHTML = 'Not quite right. Remember: Time → Practice → Name → Question. Try again!';
+          feedback.className = 'feedback warning';
           resetGreetingBuilder();
       }
   }
 
-  function showGreetingFeedback(message, type) {
-      const feedback = document.getElementById('greeting-feedback');
-      feedback.innerHTML = message;
-      feedback.className = 'feedback ' + type;
-  }
-
   function resetGreetingBuilder() {
-      document.querySelectorAll('.drop-slot').forEach(slot => {
+      document.querySelectorAll('.drop-slot').forEach((slot, index) => {
           slot.classList.remove('filled');
-          slot.innerHTML = slot.dataset.position === '1' ? 'Drop first part here' :
-                          slot.dataset.position === '2' ? 'Drop second part here' :
-                          slot.dataset.position === '3' ? 'Drop third part here' :
-                          'Drop fourth part here';
+          const positions = ['first', 'second', 'third', 'fourth'];
+          slot.innerHTML = `Drop ${positions[index]} part here`;
       });
 
       document.querySelectorAll('.component').forEach(component => {
@@ -364,17 +361,13 @@
       document.getElementById('check-greeting').disabled = true;
   }
 
-  // Audio Comparison functionality
-  let audioRatings = [0, 0, 0];
-  let ratingsComplete = 0;
-
+  // === AUDIO COMPARISON ===
   function initializeAudioComparison() {
       console.log('Initializing audio comparison...');
 
       const stars = document.querySelectorAll('.star');
 
       if (stars.length === 0) {
-          console.log('Stars not ready, trying again...');
           setTimeout(initializeAudioComparison, 500);
           return;
       }
@@ -383,13 +376,12 @@
           star.addEventListener('click', handleStarClick);
       });
 
-      console.log('Audio comparison initialized!');
+      console.log('Audio comparison ready!');
   }
 
   function handleStarClick(e) {
-      const clickedStar = e.target;
-      const rating = parseInt(clickedStar.dataset.value);
-      const starContainer = clickedStar.parentElement;
+      const rating = parseInt(e.target.dataset.value);
+      const starContainer = e.target.parentElement;
       const exampleCard = starContainer.closest('.audio-card');
       const exampleNumber = parseInt(exampleCard.dataset.example);
 
@@ -408,16 +400,12 @@
       // Show feedback
       showAudioFeedback(exampleCard, exampleNumber, rating);
 
-      // Check if all rated
-      ratingsComplete = audioRatings.filter(r => r > 0).length;
+      // Check if all examples rated
+      const ratingsComplete = audioRatings.filter(r => r > 0).length;
       if (ratingsComplete === 3) {
-          document.getElementById('audio-continue').style.display = 'inline-block';
-          document.getElementById('audio-continue').textContent = 'Continue to Practice Video';
-          document.getElementById('audio-continue').onclick = () => {
-              showSection('practice-intro-video');
-              currentStep = 7;
-              updateProgress();
-          };
+          const continueBtn = document.getElementById('audio-continue');
+          continueBtn.style.display = 'inline-block';
+          continueBtn.onclick = () => goToSection('practice-intro-video', 7);
       }
   }
 
@@ -428,10 +416,10 @@
 
       if (exampleNumber === 1) {
           if (rating <= 2) {
-              message = "Exactly! This rushed greeting sounds unprofessional and hard to understand.";
+              message = "Exactly! This rushed greeting sounds unprofessional.";
               className = "excellent";
           } else {
-              message = "This greeting is too rushed and unprofessional for patient care.";
+              message = "This greeting is too rushed for patient care.";
               className = "poor";
           }
       } else if (exampleNumber === 2) {
@@ -439,15 +427,15 @@
               message = "Good assessment! Technically correct but lacks warmth.";
               className = "excellent";
           } else {
-              message = "This greeting lacks the warmth patients need to feel welcomed.";
+              message = "This greeting lacks warmth patients need.";
               className = "good";
           }
       } else if (exampleNumber === 3) {
           if (rating >= 4) {
-              message = "Perfect! Notice the warmth and professionalism in this greeting.";
+              message = "Perfect! Notice the warmth and professionalism.";
               className = "excellent";
           } else {
-              message = "Listen again - this greeting has ideal warmth and professionalism!";
+              message = "Listen again - this has ideal warmth and professionalism!";
               className = "poor";
           }
       }
@@ -456,11 +444,8 @@
       feedbackDiv.className = `feedback-text ${className}`;
       feedbackDiv.style.display = 'block';
   }
-  // Practice Recorder functionality
-  let mediaRecorder;
-  let recordedChunks = [];
-  let isRecording = false;
 
+  // === PRACTICE RECORDER ===
   function initializePracticeRecorder() {
       console.log('Initializing practice recorder...');
 
@@ -470,7 +455,6 @@
       const checkboxes = document.querySelectorAll('.checkbox-item input[type="checkbox"]');
 
       if (!startBtn || !stopBtn) {
-          console.log('Recorder elements not ready, trying again...');
           setTimeout(initializePracticeRecorder, 500);
           return;
       }
@@ -483,7 +467,7 @@
           checkbox.addEventListener('change', updateAssessment);
       });
 
-      console.log('Practice recorder initialized successfully!');
+      console.log('Practice recorder ready!');
   }
 
   async function startRecording() {
@@ -503,9 +487,7 @@
               const blob = new Blob(recordedChunks, { type: 'audio/wav' });
               const audioURL = URL.createObjectURL(blob);
 
-              const audioElement = document.getElementById('recorded-audio');
-              audioElement.src = audioURL;
-
+              document.getElementById('recorded-audio').src = audioURL;
               document.getElementById('playback-area').style.display = 'block';
               document.getElementById('self-assessment').style.display = 'block';
 
@@ -522,7 +504,7 @@
 
       } catch (error) {
           console.error('Error accessing microphone:', error);
-          alert('Unable to access microphone. Please check your browser permissions and try again.');
+          alert('Unable to access microphone. Please check browser permissions.');
       }
   }
 
@@ -534,7 +516,7 @@
           document.getElementById('start-recording').disabled = false;
           document.getElementById('stop-recording').disabled = true;
           document.getElementById('start-recording').classList.remove('recording');
-          document.getElementById('recording-status').textContent = '✅ Recording complete! Listen to your greeting below.';
+          document.getElementById('recording-status').textContent = '✅ Recording complete!';
       }
   }
 
@@ -566,16 +548,16 @@
           feedbackDiv.innerHTML = '';
           completeBtn.style.display = 'none';
       } else if (checkedCount === totalCount) {
-          feedbackDiv.innerHTML = 'Excellent! You\'ve mastered all the key elements of a perfect greeting. You\'re ready to provide outstanding patient service!';
+          feedbackDiv.innerHTML = 'Excellent! You\'ve mastered all key elements. Ready for outstanding patient service!';
           feedbackDiv.className = 'feedback success';
           completeBtn.style.display = 'inline-block';
-          completeBtn.onclick = () => showSection('completion');
+          completeBtn.onclick = () => goToSection('completion', 8);
       } else if (checkedCount >= 3) {
-          feedbackDiv.innerHTML = `Great progress! You\'ve got ${checkedCount} out of ${totalCount} elements right. Practice the areas you haven\'t checked to perfect your greeting.`;
+          feedbackDiv.innerHTML = `Great progress! ${checkedCount}/${totalCount} elements mastered.`;
           feedbackDiv.className = 'feedback good';
           completeBtn.style.display = 'none';
       } else {
-          feedbackDiv.innerHTML = `Keep practicing! Focus on the areas you haven\'t checked. Remember: ${totalCount - checkedCount} areas still need work.`;
+          feedbackDiv.innerHTML = `Keep practicing! Focus on the ${totalCount - checkedCount} areas you haven't checked.`;
           feedbackDiv.className = 'feedback warning';
           completeBtn.style.display = 'none';
       }
