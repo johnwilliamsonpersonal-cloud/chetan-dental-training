@@ -1,4 +1,4 @@
-// Progress tracking
+  // Progress tracking
   let currentStep = 0;
   const totalSteps = 8; // Updated to include video sections
 
@@ -7,16 +7,6 @@
   let ringingInterval;
   let hasAnswered = false;
   const phoneRing = new Audio('assets/audio/phone-ring.mp3');
-
-  // Preload and setup audio
-  phoneRing.preload = 'auto';
-  phoneRing.volume = 0.7;
-  phoneRing.addEventListener('error', function(e) {
-      console.log('Audio loading error:', e);
-  });
-  phoneRing.addEventListener('canplaythrough', function() {
-      console.log('Phone ring audio loaded successfully');
-  });
 
   // Video completion tracking
   let videoCompletions = {
@@ -100,93 +90,49 @@
       // Wait for Wistia to be ready
       window._wq = window._wq || [];
 
-      // Add a slight delay to ensure Wistia is fully loaded
-      setTimeout(() => {
-          // Intro video
-          window._wq.push({ id: '6vif2yc5c5', onReady: function(video) {
-              console.log('Intro video ready');
-              video.bind('end', function() {
-                  console.log('Intro video ended');
-                  markVideoComplete('intro');
-              });
-              // Also enable button after 10 seconds as fallback
-              setTimeout(() => {
-                  if (!videoCompletions.intro) {
-                      console.log('Enabling intro button as fallback');
-                      markVideoComplete('intro');
-                  }
-              }, 10000);
-          }});
+      // Intro video
+      window._wq.push({ id: '6vif2yc5c5', onReady: function(video) {
+          video.bind('end', function() {
+              markVideoComplete('intro');
+          });
+      }});
 
-          // Ring video
-          window._wq.push({ id: 'ou03n83tjo', onReady: function(video) {
-              console.log('Ring video ready');
-              video.bind('end', function() {
-                  console.log('Ring video ended');
-                  markVideoComplete('ring');
-              });
-              setTimeout(() => {
-                  if (!videoCompletions.ring) {
-                      markVideoComplete('ring');
-                  }
-              }, 10000);
-          }});
+      // Ring video
+      window._wq.push({ id: 'ou03n83tjo', onReady: function(video) {
+          video.bind('end', function() {
+              markVideoComplete('ring');
+          });
+      }});
 
-          // Greeting video
-          window._wq.push({ id: '7be6v4rh7b', onReady: function(video) {
-              console.log('Greeting video ready');
-              video.bind('end', function() {
-                  console.log('Greeting video ended');
-                  markVideoComplete('greeting');
-              });
-              setTimeout(() => {
-                  if (!videoCompletions.greeting) {
-                      markVideoComplete('greeting');
-                  }
-              }, 10000);
-          }});
+      // Greeting video
+      window._wq.push({ id: '7be6v4rh7b', onReady: function(video) {
+          video.bind('end', function() {
+              markVideoComplete('greeting');
+          });
+      }});
 
-          // Audio video
-          window._wq.push({ id: '2yynxcpkld', onReady: function(video) {
-              console.log('Audio video ready');
-              video.bind('end', function() {
-                  console.log('Audio video ended');
-                  markVideoComplete('audio');
-              });
-              setTimeout(() => {
-                  if (!videoCompletions.audio) {
-                      markVideoComplete('audio');
-                  }
-              }, 10000);
-          }});
+      // Audio video
+      window._wq.push({ id: '2yynxcpkld', onReady: function(video) {
+          video.bind('end', function() {
+              markVideoComplete('audio');
+          });
+      }});
 
-          // Practice video
-          window._wq.push({ id: 'mut2ffueih', onReady: function(video) {
-              console.log('Practice video ready');
-              video.bind('end', function() {
-                  console.log('Practice video ended');
-                  markVideoComplete('practice');
-              });
-              setTimeout(() => {
-                  if (!videoCompletions.practice) {
-                      markVideoComplete('practice');
-                  }
-              }, 10000);
-          }});
-      }, 1000);
+      // Practice video
+      window._wq.push({ id: 'mut2ffueih', onReady: function(video) {
+          video.bind('end', function() {
+              markVideoComplete('practice');
+          });
+      }});
   }
 
   function markVideoComplete(videoType) {
-      console.log(`Video completed: ${videoType}`);
       videoCompletions[videoType] = true;
 
       // Show completion indicator
       const indicator = document.getElementById(`${videoType}-video-completed`);
       if (indicator) {
           indicator.style.display = 'block';
-          console.log(`Completion indicator shown for ${videoType}`);
-      } else {
-          console.log(`No completion indicator found for ${videoType}`);
       }
 
       // Enable corresponding continue button
@@ -213,9 +159,6 @@
       if (button) {
           button.disabled = false;
           button.classList.add('video-completed');
-          console.log(`Button ${buttonId} enabled`);
-      } else {
-          console.log(`Button ${buttonId} not found`);
       }
   }
 
@@ -243,12 +186,19 @@
 
           ringCount++;
 
-          // Play sound and update display at exactly the same moment
+          // Play sound and update display - FIXED VERSION for browser compatibility
           phoneRing.currentTime = 0;
-          phoneRing.play().catch((error) => {
-              console.log('Audio play failed:', error);
-              // Continue even if audio fails
-          });
+          phoneRing.volume = 0.5;
+
+          // Try to play with user interaction context
+          const playPromise = phoneRing.play();
+          if (playPromise !== undefined) {
+              playPromise.catch(error => {
+                  // Audio play failed - continue anyway, user will see visual feedback
+                  console.log('Audio autoplay prevented by browser policy');
+              });
+          }
+
           document.getElementById('ring-count').textContent = ringCount;
 
           // Enable answer button after first ring
