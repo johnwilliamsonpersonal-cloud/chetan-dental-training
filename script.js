@@ -69,57 +69,59 @@
       document.getElementById('answer-btn').addEventListener('click', answerPhone);
   }
 
-  // Fixed Wistia video setup - wait for proper initialization
+  // Correct setup for wistia-player custom elements
   function setupWistiaVideos() {
-      console.log('Setting up Wistia videos...');
+      console.log('Setting up Wistia player elements...');
 
-      const videoConfigs = {
-          '6vif2yc5c5': { buttonId: 'start-btn', videoType: 'intro' },
-          'ou03n83tjo': { buttonId: 'continue-to-ring', videoType: 'ring' },
-          '7be6v4rh7b': { buttonId: 'continue-to-greeting', videoType: 'greeting' },
-          '2yynxcpkld': { buttonId: 'continue-to-audio', videoType: 'audio' },
-          'mut2ffueih': { buttonId: 'continue-to-practice', videoType: 'practice' }
-      };
-
-      // Function to check if Wistia is ready and set up videos
-      function initializeWistiaVideos() {
-          if (typeof window.Wistia === 'undefined' || !window.Wistia.api) {
-              console.log('Wistia not ready yet, retrying in 1 second...');
-              setTimeout(initializeWistiaVideos, 1000);
-              return;
-          }
-
-          console.log('Wistia is ready! Setting up video events...');
-
-          Object.keys(videoConfigs).forEach(videoId => {
-              const config = videoConfigs[videoId];
-
-              // Try to get the video
-              const video = window.Wistia.api(videoId);
-              if (video) {
-                  console.log(`${config.videoType} video found and ready`);
-                  video.bind('end', function() {
-                      console.log(`${config.videoType} video ended`);
-                      enableButton(config.buttonId, config.videoType);
-                  });
-              } else {
-                  console.log(`${config.videoType} video not found yet, will retry...`);
-                  // Retry this specific video in 2 seconds
-                  setTimeout(() => {
-                      const retryVideo = window.Wistia.api(videoId);
-                      if (retryVideo) {
-                          console.log(`${config.videoType} video found on retry`);
-                          retryVideo.bind('end', function() {
-                              console.log(`${config.videoType} video ended`);
-                              enableButton(config.buttonId, config.videoType);
-                          });
-                      } else {
-                          console.log(`${config.videoType} video still not found`);
-                      }
-                  }, 2000);
-              }
-          });
+      // Wait for custom elements to be defined
+      if (!customElements.get('wistia-player')) {
+          console.log('Waiting for wistia-player element to be defined...');
+          setTimeout(setupWistiaVideos, 1000);
+          return;
       }
+
+      // Set up each video player
+      const videoPlayers = [
+          { element: document.getElementById('intro-video'), buttonId: 'start-btn', videoType: 'intro' },
+          { element: document.getElementById('ring-video'), buttonId: 'continue-to-ring', videoType: 'ring' },
+          { element: document.getElementById('greeting-video'), buttonId: 'continue-to-greeting', videoType: 'greeting' },
+          { element: document.getElementById('audio-video'), buttonId: 'continue-to-audio', videoType: 'audio' },
+          { element: document.getElementById('practice-video'), buttonId: 'continue-to-practice', videoType: 'practice' }
+      ];
+
+      videoPlayers.forEach(({ element, buttonId, videoType }) => {
+          if (element) {
+              console.log(`Setting up ${videoType} video`);
+
+              // Listen for the video end event on the custom element
+              element.addEventListener('ended', function() {
+                  console.log(`${videoType} video ended`);
+                  enableButton(buttonId, videoType);
+              });
+
+              // Also try the Wistia API method as backup
+              element.addEventListener('ready', function() {
+                  console.log(`${videoType} video ready`);
+                  const mediaId = element.getAttribute('media-id');
+
+                  // Try to bind using Wistia API if available
+                  setTimeout(() => {
+                      if (window.Wistia && window.Wistia.api) {
+                          const video = window.Wistia.api(mediaId);
+                          if (video) {
+                              video.bind('end', function() {
+                                  console.log(`${videoType} video ended (via API)`);
+                                  enableButton(buttonId, videoType);
+                              });
+                          }
+                      }
+                  }, 1000);
+              });
+          } else {
+              console.log(`${videoType} video element not found`);
+          }
+      });
+  }
 
       // Start the initialization process
       setTimeout(initializeWistiaVideos, 2000);
