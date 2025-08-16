@@ -8,16 +8,6 @@
   let hasAnswered = false;
   const phoneRing = new Audio('assets/audio/phone-ring.mp3');
 
-  // Preload and setup audio
-  phoneRing.preload = 'auto';
-  phoneRing.volume = 0.7;
-  phoneRing.addEventListener('error', function(e) {
-      console.log('Audio loading error:', e);
-  });
-  phoneRing.addEventListener('canplaythrough', function() {
-      console.log('Phone ring audio loaded successfully');
-  });
-
   // Video completion tracking
   let videoCompletions = {
       intro: false,
@@ -198,10 +188,7 @@
 
           // Play sound and update display at exactly the same moment
           phoneRing.currentTime = 0;
-          phoneRing.play().catch((error) => {
-              console.log('Audio play failed:', error);
-              // Continue even if audio fails
-          });
+          phoneRing.play().catch(() => {});
           document.getElementById('ring-count').textContent = ringCount;
 
           // Enable answer button after first ring
