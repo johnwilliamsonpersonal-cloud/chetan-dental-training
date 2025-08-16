@@ -1,4 +1,4 @@
-  // Progress tracking
+// Progress tracking
   let currentStep = 0;
   const totalSteps = 8; // Updated to include video sections
 
