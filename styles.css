@@ -1,0 +1,658 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.module-container {
+    max-width: 800px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    overflow: hidden;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background: #e0e0e0;
+}
+
+.progress {
+    height: 100%;
+    background: #4CAF50;
+    width: 0%;
+    transition: width 0.5s ease;
+}
+
+.section {
+    display: none;
+    padding: 40px;
+    text-align: center;
+}
+
+.section.active {
+    display: block;
+}
+
+h1 {
+    color: #2c3e50;
+    margin-bottom: 20px;
+    font-size: 2.5em;
+}
+
+h2 {
+    color: #34495e;
+    margin-bottom: 30px;
+    font-size: 2em;
+}
+
+p {
+    color: #7f8c8d;
+    line-height: 1.6;
+    margin-bottom: 30px;
+    font-size: 1.2em;
+}
+
+.primary-btn {
+    background: #3498db;
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    font-size: 1.2em;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.primary-btn:hover:not(:disabled) {
+    background: #2980b9;
+    transform: translateY(-2px);
+}
+
+.primary-btn:disabled {
+    background: #bdc3c7;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.primary-btn.video-completed {
+    background: #27ae60;
+    box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
+}
+
+.primary-btn.video-completed:hover {
+    background: #229954;
+}
+
+.phone-container {
+    margin: 40px 0;
+}
+
+.phone {
+    width: 200px;
+    height: 350px;
+    background: #2c3e50;
+    border-radius: 25px;
+    margin: 0 auto;
+    padding: 20px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+}
+
+.screen {
+    width: 100%;
+    height: 100%;
+    background: #ecf0f1;
+    border-radius: 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.ring-counter {
+    font-size: 2em;
+    font-weight: bold;
+    color: #e74c3c;
+    margin-bottom: 30px;
+}
+
+.answer-btn {
+    background: #27ae60;
+    color: white;
+    border: none;
+    padding: 15px 25px;
+    border-radius: 50px;
+    font-size: 1.1em;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.answer-btn:disabled {
+    background: #bdc3c7;
+    cursor: not-allowed;
+}
+
+.answer-btn:not(:disabled):hover {
+    background: #229954;
+    transform: scale(1.1);
+}
+
+.feedback {
+    margin-top: 20px;
+    padding: 15px;
+    border-radius: 8px;
+    font-weight: bold;
+    min-height: 50px;
+}
+
+.feedback.success {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.feedback.warning {
+    background: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeaa7;
+}
+
+@media (max-width: 600px) {
+    .section {
+        padding: 20px;
+    }
+    
+    h1 {
+        font-size: 2em;
+    }
+    
+    .phone {
+        width: 150px;
+        height: 250px;
+    }
+}
+/* Greeting Builder Styles */
+.greeting-components {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
+    margin: 30px 0;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    border: 2px dashed #bdc3c7;
+}
+
+.component {
+    background: #3498db;
+    color: white;
+    padding: 15px 20px;
+    border-radius: 8px;
+    cursor: grab;
+    user-select: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.component:hover {
+    background: #2980b9;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+}
+
+.component.dragging {
+    opacity: 0.5;
+    transform: rotate(5deg);
+    cursor: grabbing;
+}
+
+.drop-zone {
+    margin: 30px 0;
+    padding: 20px;
+    background: white;
+    border-radius: 10px;
+    border: 2px solid #ecf0f1;
+}
+
+.drop-slot {
+    background: #ecf0f1;
+    border: 2px dashed #bdc3c7;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 10px 0;
+    text-align: center;
+    color: #7f8c8d;
+    font-style: italic;
+    min-height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.drop-slot.drag-over {
+    background: #d5e8f5;
+    border-color: #3498db;
+    transform: scale(1.02);
+}
+
+.drop-slot.filled {
+    background: #d4edda;
+    border-color: #27ae60;
+    color: #155724;
+    font-style: normal;
+    font-weight: 500;
+}
+
+.drop-slot.filled .component {
+    background: #27ae60;
+    margin: 0;
+    box-shadow: none;
+}
+
+@media (max-width: 600px) {
+    .greeting-components {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .component {
+        width: 100%;
+        max-width: 250px;
+        text-align: center;
+    }
+}
+/* Audio Comparison Styles */
+.audio-examples {
+    display: grid;
+    gap: 30px;
+    margin: 30px 0;
+}
+
+.audio-card {
+    background: white;
+    border-radius: 15px;
+    padding: 25px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    border: 2px solid #ecf0f1;
+    transition: all 0.3s ease;
+}
+
+.audio-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 35px rgba(0,0,0,0.15);
+}
+
+.audio-card h3 {
+    color: #2c3e50;
+    margin-bottom: 15px;
+    font-size: 1.3em;
+}
+
+.audio-card audio {
+    width: 100%;
+    margin: 15px 0;
+    border-radius: 8px;
+}
+
+.rating-system {
+    margin: 20px 0;
+    text-align: center;
+}
+
+.rating-system span {
+    display: block;
+    margin-bottom: 10px;
+    color: #34495e;
+    font-weight: 500;
+}
+
+.stars {
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+    margin: 10px 0;
+}
+
+.star {
+    font-size: 2em;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    opacity: 0.3;
+}
+
+.star:hover,
+.star.active {
+    opacity: 1;
+    transform: scale(1.2);
+}
+
+.star.active {
+    filter: drop-shadow(0 0 8px #f39c12);
+}
+
+.feedback-text {
+    margin-top: 15px;
+    padding: 15px;
+    border-radius: 8px;
+    font-weight: 500;
+    text-align: center;
+    animation: fadeIn 0.5s ease-in;
+}
+
+.feedback-text.poor {
+    background: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeaa7;
+}
+
+.feedback-text.good {
+    background: #d1ecf1;
+    color: #0c5460;
+    border: 1px solid #bee5eb;
+}
+
+.feedback-text.excellent {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 600px) {
+    .audio-card {
+        padding: 20px 15px;
+    }
+    
+    .stars {
+        gap: 3px;
+    }
+    
+    .star {
+        font-size: 1.8em;
+    }
+}
+/* Practice Recorder Styles */
+.recording-area {
+    background: #f8f9fa;
+    border-radius: 15px;
+    padding: 30px;
+    margin: 30px 0;
+    text-align: center;
+}
+
+.record-controls {
+    margin-bottom: 30px;
+}
+
+.record-btn {
+    background: #e74c3c;
+    color: white;
+    border: none;
+    padding: 15px 25px;
+    font-size: 1.2em;
+    border-radius: 50px;
+    cursor: pointer;
+    margin: 0 10px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+}
+
+.record-btn:hover:not(:disabled) {
+    background: #c0392b;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4);
+}
+
+.record-btn:disabled {
+    background: #bdc3c7;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.record-btn.recording {
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.status-text {
+    margin-top: 15px;
+    font-weight: bold;
+    color: #e74c3c;
+    font-size: 1.1em;
+}
+
+#playback-area {
+    background: white;
+    border-radius: 10px;
+    padding: 25px;
+    margin: 20px 0;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+#playback-area h3 {
+    color: #27ae60;
+    margin-bottom: 15px;
+}
+
+#recorded-audio {
+    width: 100%;
+    margin: 15px 0;
+}
+
+.assessment-checklist {
+    background: white;
+    border-radius: 10px;
+    padding: 25px;
+    margin: 20px 0;
+    text-align: left;
+}
+
+.checkbox-item {
+    display: flex;
+    align-items: center;
+    margin: 15px 0;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.checkbox-item:hover {
+    background: #f8f9fa;
+    padding: 10px;
+    border-radius: 8px;
+}
+
+.checkbox-item input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    margin-right: 15px;
+    cursor: pointer;
+}
+
+.checkbox-item span {
+    font-size: 1.1em;
+    color: #2c3e50;
+}
+
+.reminder-box {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 15px;
+    padding: 25px;
+    margin: 30px 0;
+    text-align: center;
+}
+
+.reminder-box h4 {
+    margin-bottom: 15px;
+    font-size: 1.3em;
+}
+
+.reminder-box p {
+    font-size: 1.1em;
+    margin: 0;
+}
+
+/* Completion Section */
+.completion-celebration {
+    text-align: center;
+    padding: 40px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 20px;
+    margin: 20px 0;
+}
+
+.completion-celebration h1 {
+    font-size: 3em;
+    margin-bottom: 20px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+.completion-celebration h2 {
+    font-size: 1.8em;
+    margin-bottom: 30px;
+    color: #ecf0f1;
+}
+
+.skills-learned {
+    background: rgba(255,255,255,0.1);
+    border-radius: 15px;
+    padding: 25px;
+    margin: 30px 0;
+    backdrop-filter: blur(10px);
+}
+
+.skills-learned h3 {
+    color: #f1c40f;
+    margin-bottom: 20px;
+}
+
+.skills-learned ul {
+    list-style: none;
+    padding: 0;
+}
+
+.skills-learned li {
+    margin: 10px 0;
+    font-size: 1.1em;
+    text-align: left;
+}
+
+.next-steps {
+    background: rgba(255,255,255,0.1);
+    border-radius: 15px;
+    padding: 25px;
+    margin: 30px 0;
+    backdrop-filter: blur(10px);
+}
+
+.next-steps h3 {
+    color: #f1c40f;
+    margin-bottom: 15px;
+}
+
+.next-steps .primary-btn {
+    background: #f1c40f;
+    color: #2c3e50;
+    font-weight: bold;
+    font-size: 1.2em;
+    padding: 15px 30px;
+}
+
+.next-steps .primary-btn:hover {
+    background: #f39c12;
+}
+
+@media (max-width: 600px) {
+    .recording-area {
+        padding: 20px 15px;
+    }
+    
+    .record-btn {
+        display: block;
+        width: 100%;
+        margin: 10px 0;
+    }
+    
+    .completion-celebration {
+        padding: 30px 20px;
+    }
+    
+    .completion-celebration h1 {
+        font-size: 2.5em;
+    }
+}
+/* Video Integration Styles */
+.video-container {
+    background: #f8f9fa;
+    border-radius: 15px;
+    padding: 20px;
+    margin: 20px 0;
+}
+
+.video-section-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+}
+
+.video-section-header h3 {
+    margin: 0;
+    font-size: 1.3em;
+}
+
+.video-player {
+    width: 100%;
+    max-width: 600px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    margin: 15px 0;
+}
+
+.video-completion-indicator {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+    padding: 10px 15px;
+    border-radius: 8px;
+    margin: 15px 0;
+    font-weight: bold;
+    text-align: center;
+    animation: fadeInScale 0.5s ease-in;
+}
+
+@keyframes fadeInScale {
+    from { 
+        opacity: 0; 
+        transform: scale(0.9); 
+    }
+    to { 
+        opacity: 1; 
+        transform: scale(1); 
+    }
+}
