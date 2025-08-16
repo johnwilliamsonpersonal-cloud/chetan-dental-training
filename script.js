@@ -100,49 +100,93 @@
       // Wait for Wistia to be ready
       window._wq = window._wq || [];
 
-      // Intro video
-      window._wq.push({ id: '6vif2yc5c5', onReady: function(video) {
-          video.bind('end', function() {
-              markVideoComplete('intro');
-          });
-      }});
+      // Add a slight delay to ensure Wistia is fully loaded
+      setTimeout(() => {
+          // Intro video
+          window._wq.push({ id: '6vif2yc5c5', onReady: function(video) {
+              console.log('Intro video ready');
+              video.bind('end', function() {
+                  console.log('Intro video ended');
+                  markVideoComplete('intro');
+              });
+              // Also enable button after 10 seconds as fallback
+              setTimeout(() => {
+                  if (!videoCompletions.intro) {
+                      console.log('Enabling intro button as fallback');
+                      markVideoComplete('intro');
+                  }
+              }, 10000);
+          }});
 
-      // Ring video
-      window._wq.push({ id: 'ou03n83tjo', onReady: function(video) {
-          video.bind('end', function() {
-              markVideoComplete('ring');
-          });
-      }});
+          // Ring video
+          window._wq.push({ id: 'ou03n83tjo', onReady: function(video) {
+              console.log('Ring video ready');
+              video.bind('end', function() {
+                  console.log('Ring video ended');
+                  markVideoComplete('ring');
+              });
+              setTimeout(() => {
+                  if (!videoCompletions.ring) {
+                      markVideoComplete('ring');
+                  }
+              }, 10000);
+          }});
 
-      // Greeting video
-      window._wq.push({ id: '7be6v4rh7b', onReady: function(video) {
-          video.bind('end', function() {
-              markVideoComplete('greeting');
-          });
-      }});
+          // Greeting video
+          window._wq.push({ id: '7be6v4rh7b', onReady: function(video) {
+              console.log('Greeting video ready');
+              video.bind('end', function() {
+                  console.log('Greeting video ended');
+                  markVideoComplete('greeting');
+              });
+              setTimeout(() => {
+                  if (!videoCompletions.greeting) {
+                      markVideoComplete('greeting');
+                  }
+              }, 10000);
+          }});
 
-      // Audio video
-      window._wq.push({ id: '2yynxcpkld', onReady: function(video) {
-          video.bind('end', function() {
-              markVideoComplete('audio');
-          });
-      }});
+          // Audio video
+          window._wq.push({ id: '2yynxcpkld', onReady: function(video) {
+              console.log('Audio video ready');
+              video.bind('end', function() {
+                  console.log('Audio video ended');
+                  markVideoComplete('audio');
+              });
+              setTimeout(() => {
+                  if (!videoCompletions.audio) {
+                      markVideoComplete('audio');
+                  }
+              }, 10000);
+          }});
 
-      // Practice video
-      window._wq.push({ id: 'mut2ffueih', onReady: function(video) {
-          video.bind('end', function() {
-              markVideoComplete('practice');
-          });
-      }});
+          // Practice video
+          window._wq.push({ id: 'mut2ffueih', onReady: function(video) {
+              console.log('Practice video ready');
+              video.bind('end', function() {
+                  console.log('Practice video ended');
+                  markVideoComplete('practice');
+              });
+              setTimeout(() => {
+                  if (!videoCompletions.practice) {
+                      markVideoComplete('practice');
+                  }
+              }, 10000);
+          }});
+      }, 1000);
   }
 
   function markVideoComplete(videoType) {
+      console.log(`Video completed: ${videoType}`);
       videoCompletions[videoType] = true;
 
       // Show completion indicator
       const indicator = document.getElementById(`${videoType}-video-completed`);
       if (indicator) {
           indicator.style.display = 'block';
+          console.log(`Completion indicator shown for ${videoType}`);
+      } else {
+          console.log(`No completion indicator found for ${videoType}`);
       }
 
       // Enable corresponding continue button
@@ -169,6 +213,9 @@
       if (button) {
           button.disabled = false;
           button.classList.add('video-completed');
+          console.log(`Button ${buttonId} enabled`);
+      } else {
+          console.log(`Button ${buttonId} not found`);
       }
   }
 
