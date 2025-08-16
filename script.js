@@ -186,19 +186,9 @@
 
           ringCount++;
 
-          // Play sound and update display - FIXED VERSION for browser compatibility
+          // Play sound and update display at exactly the same moment
           phoneRing.currentTime = 0;
-          phoneRing.volume = 0.5;
-
-          // Try to play with user interaction context
-          const playPromise = phoneRing.play();
-          if (playPromise !== undefined) {
-              playPromise.catch(error => {
-                  // Audio play failed - continue anyway, user will see visual feedback
-                  console.log('Audio autoplay prevented by browser policy');
-              });
-          }
-
+          phoneRing.play().catch(() => {});
           document.getElementById('ring-count').textContent = ringCount;
 
           // Enable answer button after first ring
