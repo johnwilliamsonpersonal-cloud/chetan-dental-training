@@ -69,12 +69,10 @@
       document.getElementById('answer-btn').addEventListener('click', answerPhone);
   }
 
-  // Updated Wistia video setup for wistia-player elements
+  // Fixed Wistia video setup - wait for proper initialization
   function setupWistiaVideos() {
-      // Configure Wistia players using the new method
-      window.wistiaOptions = window.wistiaOptions || {};
+      console.log('Setting up Wistia videos...');
 
-      // Set up each video with completion tracking
       const videoConfigs = {
           '6vif2yc5c5': { buttonId: 'start-btn', videoType: 'intro' },
           'ou03n83tjo': { buttonId: 'continue-to-ring', videoType: 'ring' },
@@ -83,36 +81,50 @@
           'mut2ffueih': { buttonId: 'continue-to-practice', videoType: 'practice' }
       };
 
-      // Wait for players to be ready and bind events
-      setTimeout(() => {
+      // Function to check if Wistia is ready and set up videos
+      function initializeWistiaVideos() {
+          if (typeof window.Wistia === 'undefined' || !window.Wistia.api) {
+              console.log('Wistia not ready yet, retrying in 1 second...');
+              setTimeout(initializeWistiaVideos, 1000);
+              return;
+          }
+
+          console.log('Wistia is ready! Setting up video events...');
+
           Object.keys(videoConfigs).forEach(videoId => {
               const config = videoConfigs[videoId];
 
-              // Try to get the Wistia player
-              if (window.Wistia && window.Wistia.api) {
-                  const video = window.Wistia.api(videoId);
-                  if (video) {
-                      console.log(`${config.videoType} video ready`);
-                      video.bind('end', function() {
-                          console.log(`${config.videoType} video ended`);
-                          enableButton(config.buttonId, config.videoType);
-                      });
-                  } else {
-                      console.log(`Waiting for ${config.videoType} video...`);
-                      // Retry in 2 seconds if video not ready
-                      setTimeout(() => {
-                          const retryVideo = window.Wistia.api(videoId);
-                          if (retryVideo) {
-                              retryVideo.bind('end', function() {
-                                  enableButton(config.buttonId, config.videoType);
-                              });
-                          }
-                      }, 2000);
-                  }
+              // Try to get the video
+              const video = window.Wistia.api(videoId);
+              if (video) {
+                  console.log(`${config.videoType} video found and ready`);
+                  video.bind('end', function() {
+                      console.log(`${config.videoType} video ended`);
+                      enableButton(config.buttonId, config.videoType);
+                  });
+              } else {
+                  console.log(`${config.videoType} video not found yet, will retry...`);
+                  // Retry this specific video in 2 seconds
+                  setTimeout(() => {
+                      const retryVideo = window.Wistia.api(videoId);
+                      if (retryVideo) {
+                          console.log(`${config.videoType} video found on retry`);
+                          retryVideo.bind('end', function() {
+                              console.log(`${config.videoType} video ended`);
+                              enableButton(config.buttonId, config.videoType);
+                          });
+                      } else {
+                          console.log(`${config.videoType} video still not found`);
+                      }
+                  }, 2000);
               }
           });
-      }, 1000);
+      }
+
+      // Start the initialization process
+      setTimeout(initializeWistiaVideos, 2000);
   }
+
 
   // Enable button after video completion
   function enableButton(buttonId, videoType) {
